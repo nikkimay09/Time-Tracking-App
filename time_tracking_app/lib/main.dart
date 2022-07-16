@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -13,36 +14,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Time Tracker'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -52,11 +33,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
@@ -64,52 +40,291 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // by the _incrementCounter method above. 
+    TextEditingController taskNameController = new TextEditingController();
+    String text = "";
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: Container(
+          color: Colors.white,
+          margin: EdgeInsets.all(50),
+          child: Column(
+            children: <Widget> [
+              Text("Add a new task",style: TextStyle(color: Colors.green)),
+              TextField(
+                controller: taskNameController,
+                // onChanged: (text) {
+                //   taskNameController.text = text;
+                // },
+                textAlign: TextAlign.center,
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.green,
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                  )
+                ),
+                onPressed: (){
+                  if(taskNameController.text.length>1){
+                    addTaskName(taskNameController.text);
+                  }
+                },
+                child: Text('Add new Task'),
+              )
+            ]
+          )
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  //will show a message where the user can log their event in
+  void addTaskName(String name){
+    print("Name of the Task: " + name);
+    Navigator.push(
+      context, 
+      MaterialPageRoute(builder: (context)=>SecondRoute(name))
+      );
+  }
+}
+
+class SecondRoute extends StatelessWidget{
+  late String taskName;
+  List<String> daysOfWeek = [];
+  late Future<TimeOfDay> timeFrom;
+  late Future<TimeOfDay> timeTo;
+  bool mon = false;
+  bool tue = false;
+  bool wed = false;
+  bool thu = false;
+  bool fri = false;
+  bool sat = false;
+  bool sun = false;
+  
+
+  SecondRoute(String taskName){
+    this.taskName = taskName;
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(taskName),
+      ),
+      body:Center(
+        child: Container(
+          margin: EdgeInsets.only(top: 25),
+          child: Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(top: 0, bottom: 100),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    //each container for each day
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Mon", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: mon, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Monday")){
+                                  this.daysOfWeek.add("Monday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Monday");
+                                }
+                                setState() {
+                                  mon = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ), 
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Tue", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: tue, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Tuesday")){
+                                  this.daysOfWeek.add("Tuesday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Tuesday");
+                                }
+                                setState() {
+                                  tue = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ), 
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Wed", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: wed, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Wednesday")){
+                                  this.daysOfWeek.add("Wednesday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Wednesday");
+                                }
+                                setState() {
+                                  wed = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ),
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Thu", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: thu, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Thursday")){
+                                  this.daysOfWeek.add("Thursday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Thursday");
+                                }
+                                setState() {
+                                  thu = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ),
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Fri", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: fri, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Friday")){
+                                  this.daysOfWeek.add("Friday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Friday");
+                                }
+                                setState() {
+                                  fri = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ),
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Sat", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: sat, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Saturday")){
+                                  this.daysOfWeek.add("Saturday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Saturday");
+                                }
+                                setState() {
+                                  sat = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ),
+                    Container(
+                      //color: Colors.green,
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[
+                            Text("Sun", style: TextStyle(fontSize: 10),),
+                            Checkbox(
+                             value: sun, 
+                              onChanged: (value){
+                                if(this.daysOfWeek.contains("Sunday")){
+                                  this.daysOfWeek.add("Sunday");
+                                }
+                                else{
+                                  this.daysOfWeek.remove("Sunday");
+                                }
+                                setState() {
+                                  sun = value!;
+                                }
+                              }
+                            )
+                          ],
+                        )
+                      ),
+                    ),
+                  ]
+                ),
+              ),
+              Container(),
+              ElevatedButton(
+                onPressed: (){
+                  createTask();
+                  //Navigator.pop(context);
+                }, 
+                child: Text('Create Task'),
+              )
+            ],
+          ) 
+        ),
+      )
+    );
+  }
+  void createTask() async{
+    for (String day in daysOfWeek){
+      print(day);
+    }
+    DateTime current = new DateTime.now();
+    DateTime? startTime;
+    DateTime? endTime;
+
+    await timeFrom.then((value) => startTime = new DateTime(current.year, current.day, value.hour, value.minute));
+    print(startTime.toString());
+    await timeTo.then((value) => endTime = new DateTime(current.year, current.day, value.hour, value.minute));
+    print(endTime.toString());
+
+
   }
 }
